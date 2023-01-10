@@ -1,0 +1,126 @@
+
+
+#include "raylib.h"
+
+#include "rlgl.h"           // Required for: Vertex definition
+#include "raymath.h"
+
+#define MAX_POINTS  4   // 10 points and back to the start
+
+// Draw textured polygon, defined by vertex and texture coordinates
+void DrawTexturePoly(Texture2D texture, Vector2 center, Vector2 *points, Vector2 *texcoords, int pointCount, Color tint);
+
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+int main(void)
+{
+    // Initialization
+    //--------------------------------------------------------------------------------------
+    const int screenWidth = 800;
+    const int screenHeight = 450;
+
+    InitWindow(screenWidth, screenHeight, "raylib [textures] example - textured polygon");
+
+    // Define texture coordinates to map our texture to poly
+    Vector2 texcoords[MAX_POINTS] = {
+            (Vector2){ 0.0f, 0.0f },
+            (Vector2){ 1.0f, 1.0f },
+            (Vector2){ 1.0f, 0.0f},
+            (Vector2){ 0.0f, 0.0f}
+    };
+
+    Vector2 texcoords2[MAX_POINTS] = {
+            (Vector2){ 0.0f, 0.0f },
+            (Vector2){ 0.0f, 1.0f },
+            (Vector2){ 1.0f, 1.0f},
+            (Vector2){ 0.0f, 0.0f}
+    };
+
+    // Define the base poly vertices from the UV's
+    // NOTE: They can be specified in any other way
+    Vector2 points[MAX_POINTS] = { 0 };
+    for (int i = 0; i < MAX_POINTS; i++)
+    {
+        points[i].x = texcoords[i].x * 100;
+        points[i].y = texcoords[i].y * 100;
+
+    }
+    Vector2 points2[MAX_POINTS] = { 0 };
+
+    for (int i = 0; i < MAX_POINTS; i++)
+    {
+        points2[i].x = texcoords2[i].x * 200;
+        points2[i].y = texcoords2[i].y * 200;
+    }
+
+    // Define the vertices drawing position
+    // NOTE: Initially same as points but updated every frame
+    Vector2 positions[MAX_POINTS] = { 0 };
+    for (int i = 0; i < MAX_POINTS; i++) positions[i] = points[i];
+
+    Vector2 positions2[MAX_POINTS] = { 0 };
+    for (int i = 0; i < MAX_POINTS; i++) positions2[i] = points2[i];
+
+
+    // Load texture to be mapped to poly
+    Texture texture = LoadTexture(ASSETS_PATH"/cat.png");
+
+    Image img = GenImageChecked(256, 256, 32,32, BLACK, GRAY);
+    Texture tx = LoadTextureFromImage(img);
+    UnloadImage(img);
+
+
+    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
+
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
+        // Update
+        //----------------------------------------------------------------------------------
+        // Update points rotation with an angle transform
+        // NOTE: Base points position are not modified
+
+        // Draw
+        //----------------------------------------------------------------------------------
+        BeginDrawing();
+
+        ClearBackground(RAYWHITE);
+
+        rlSetTexture(tx.id);
+
+        rlBegin(RL_QUADS);
+
+        rlColor4f(1,1,1,1);
+        {
+            rlTexCoord2f(0,0);
+            rlVertex2f(100,100);
+
+            rlTexCoord2f(0,1);
+            rlVertex2f(100,400);
+
+            rlTexCoord2f(1,1);
+            rlVertex2f(400, 400);
+
+            rlTexCoord2f(1, 0);
+            rlVertex2f(400, 100);
+
+        }
+
+        rlEnd();
+
+        rlSetTexture(0);
+
+        EndDrawing();
+    }
+
+    // De-Initialization
+    //--------------------------------------------------------------------------------------
+    UnloadTexture(texture); // Unload texture
+
+    CloseWindow();          // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
+
+    return 0;
+}
